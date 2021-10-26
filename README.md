@@ -33,25 +33,24 @@
 
 ## 서비스 구성도
 
-![거상_아키텍처.PNG](C:\Users\mark146\Desktop\거상_아키텍처.PNG)
+![거상_아키텍처](https://user-images.githubusercontent.com/24368929/138806183-ca70cd42-c6b8-4696-b64a-b46aaec30d6c.PNG)
 
 
 ##주요 기능
 #### 1. 캐릭터 생성 / 삭제
 
-![거상_캐릭터.PNG](C:\Users\mark146\Desktop\포폴 사진들\거상_캐릭터.PNG)
+![거상_캐릭터](https://user-images.githubusercontent.com/24368929/138806107-a79355b4-0662-4bda-8a5d-dd6cb7217650.PNG)
 
 #### 2. 인벤토리
 
-![거상_인벤토리.PNG](C:\Users\mark146\Desktop\포폴 사진들\거상_인벤토리.PNG)
+![거상_인벤토리](https://user-images.githubusercontent.com/24368929/138806122-1858d7a2-1f85-400a-bf81-8ad2e101d00f.PNG)
 
 #### 3. 채팅
 
-![거상_채팅.PNG](C:\Users\mark146\Desktop\포폴 사진들\거상_채팅.PNG)
+![거상_채팅](https://user-images.githubusercontent.com/24368929/138806135-0013a735-bedb-4550-b0ac-594f2bc8e3c1.PNG)
 
 #### 4. 전투
 
-![거상_전투기능.PNG](C:\Users\mark146\Desktop\포폴 사진들\거상_전투기능.PNG)
-
+![거상_전투기능](https://user-images.githubusercontent.com/24368929/138806143-4b33ada2-4843-4410-8757-8724fb51c7df.PNG)
 
 ##시연 영상 링크
