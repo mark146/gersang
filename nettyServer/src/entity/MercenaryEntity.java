@@ -7,11 +7,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MercenaryEntity {
     // JDBC 관련 변수
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
+
 
     // 17: 캐릭터 용병 조회
     public List<String> MercenaryCheck(String name) {
@@ -22,8 +24,7 @@ public class MercenaryEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "select * from Mercenary where PlayerID=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, name.trim());
@@ -55,18 +56,17 @@ public class MercenaryEntity {
             if(unitList.size() == 0) {
                 unitList.add("용병이 존재하지 않습니다.");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         return unitList;
     }
 
 
+    // 용병 고용
     public List<String> MercenaryBuy(String playerId, String mercenaryName) {
         List<String> unitList = new ArrayList<String>();
 
@@ -75,8 +75,7 @@ public class MercenaryEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "insert into Mercenary(PlayerID, Name, Job, Lv, MaxLv, "
                     + "HP, MaxHP, MP, MaxMP, EXP, "
                     + "MaxEXP, Attack, Defense, STR, DEX, CON, WIS) "
@@ -104,7 +103,7 @@ public class MercenaryEntity {
             // 4. SQL 실행
             stmt.executeUpdate();
             System.out.println("용병 생성이 완료되었습니다.");
-            
+
             // 용병 정보 저장
             unitList.add(playerId);
             unitList.add(mercenaryName);
@@ -123,24 +122,22 @@ public class MercenaryEntity {
             unitList.add("10");
             unitList.add("10");
             unitList.add("10");
-            
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         return unitList;
     }
+
 
     public void MercenarySell(String playerId, String mercenaryName) {
         try {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "delete from Mercenary where PlayerID=? AND Job=? ";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, playerId.trim());
@@ -149,13 +146,11 @@ public class MercenaryEntity {
             // 4. SQL 실행
             stmt.executeUpdate();
             System.out.println("캐릭터 삭제가 완료되었습니다.");
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
     }
 }

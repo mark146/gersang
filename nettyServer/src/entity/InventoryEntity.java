@@ -9,20 +9,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class InventoryEntity {
     // JDBC 관련 변수
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
-    Map<String, String> sendData = new HashMap<>();
+
 
     public void InventoryCreate(String nickName) {
         try {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "INSERT INTO Inventory (UserID, Slot_1, Slot_2, Slot_3, Slot_4, Slot_5, Slot_6, Slot_7, Slot_8, Slot_9, Slot_10, Slot_11, Slot_12) "
                     + "VALUES (?,'없음','없음','없음','없음','없음','없음','없음','없음','없음','없음','없음', '없음')";
             stmt = conn.prepareStatement(sql);
@@ -39,13 +39,13 @@ public class InventoryEntity {
         }
     }
 
+
     public void InventoryDelete(String nickName) {
         try {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "delete from Inventory where UserID=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, nickName.trim());
@@ -62,6 +62,7 @@ public class InventoryEntity {
         }
     }
 
+
     public List<String> InventoryOpen(String userID) {
         List<String> inven = new ArrayList<String>();
 
@@ -69,8 +70,7 @@ public class InventoryEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "select * from Inventory where UserID=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, userID.trim());
@@ -92,31 +92,18 @@ public class InventoryEntity {
                 inven.add(rs.getString("Slot_10"));
                 inven.add(rs.getString("Slot_11"));
                 inven.add(rs.getString("Slot_12"));
-
-//                System.out.println("Slot_1: " + rs.getString("Slot_1"));
-//                System.out.println("Slot_2: " + rs.getString("Slot_2"));
-//                System.out.println("Slot_3: " + rs.getString("Slot_3"));
-//                System.out.println("Slot_4: " + rs.getString("Slot_4"));
-//                System.out.println("Slot_5: " + rs.getString("Slot_5"));
-//                System.out.println("Slot_6: " + rs.getString("Slot_6"));
-//                System.out.println("Slot_7: " + rs.getString("Slot_7"));
-//                System.out.println("Slot_8: " + rs.getString("Slot_8"));
-//                System.out.println("Slot_9: " + rs.getString("Slot_9"));
-//                System.out.println("Slot_10: " + rs.getString("Slot_10"));
-//                System.out.println("Slot_11: " + rs.getString("Slot_11"));
-//                System.out.println("Slot_12: " + rs.getString("Slot_12"));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         return inven;
     }
 
+
+    // 인벤토리 수정
     public Map<String, String> InventoryUpdate(String userID, List<String> invenList) {
         System.out.println("InventoryUpdate - 유저 아이디: "+userID);
         Map<String, String> sendData = new HashMap<String, String>();
@@ -125,8 +112,7 @@ public class InventoryEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "update Inventory set Slot_1=?, Slot_2=?, "
                     + "Slot_3=?, Slot_4=?, Slot_5=?, Slot_6=?, Slot_7=?, Slot_8=?, "
                     + "Slot_9=?, Slot_10=?, Slot_11=?, Slot_12=? where UserID=?";
@@ -146,10 +132,11 @@ public class InventoryEntity {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         return sendData;
     }
 
+
+    // 인벤토리 슬롯 수정
     public void InventorySlotUpdate(List<String> sellList) {
        /*
         0: 플레이어 명
@@ -205,11 +192,7 @@ public class InventoryEntity {
                     break;
             }
             sql += " where UserID=?";
-
-            // System.out.println("sql 생성 결과: "+sql);
-
             stmt = conn.prepareStatement(sql);
-
             stmt.setString(1, sellList.get(3).trim());
             stmt.setString(2, sellList.get(0).trim());
 
@@ -224,6 +207,5 @@ public class InventoryEntity {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
     }
 }

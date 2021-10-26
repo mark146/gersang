@@ -6,10 +6,10 @@ import entity.GearEntity;
 import entity.InventoryEntity;
 import entity.UserEntity;
 import vo.User;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 public class LobbyController {
     Gson gson = new GsonBuilder().setLenient().setPrettyPrinting().create();
@@ -19,13 +19,12 @@ public class LobbyController {
     String result = null;
     Map<String, String> sendData = new HashMap<>();
 
+
     public String controller(int key, Object value) {
         result = null;
         sendData.clear();
 
         switch (key) {
-
-            //  case "1": case "2": case "3": case "10": case "11": case "12": case "13":
             case 1:
                 User user = gson.fromJson(String.valueOf(value), User.class);
                 String id = user.getId();
@@ -42,10 +41,12 @@ public class LobbyController {
                 } else {
                     result = gson.toJson(userEntity.Login(user));
                 }
-
                 break;
             case 2:
-                sendData = userEntity.Verification(String.valueOf(value));
+                String text = gson.fromJson(String.valueOf(value), String.class);
+                System.out.println("case 2: gson.fromJson - text: "+text);
+
+                sendData = userEntity.Verification(text);
 
                 result = gson.toJson(sendData);
                 break;
@@ -63,17 +64,16 @@ public class LobbyController {
 
                 result = gson.toJson(sendData);
                 break;
-            case 11:
-                //캐릭터 생성창 - 캐릭터 생성
+            case 11: // 캐릭터 생성창 - 캐릭터 생성
                 List<String> nameList = gson.fromJson(String.valueOf(value), List.class);
                 /*
                 0: 플레이어 아이디
                 1: 캐릭터 이름
                 2: 캐릭터 성별
                 */
-                for(int i =0; i<nameList.size(); i++) {
-                    System.out.println("nameList.get(i): "+nameList.get(i));
-                }
+//                for(int i =0; i<nameList.size(); i++) {
+//                    System.out.println("nameList.get(i): "+nameList.get(i));
+//                }
 
                 sendData = userEntity.PlayerCreate(nameList);
 
@@ -84,7 +84,7 @@ public class LobbyController {
 
                 result = gson.toJson(sendData);
                 break;
-            case 12:
+            case 12: // 캐릭터 선택창 - 캐릭터 조회
                 // Object -> String으로 변환
                 String userId = gson.fromJson(String.valueOf(value), String.class);
 
@@ -93,9 +93,9 @@ public class LobbyController {
 
                 result = gson.toJson(playerCheck);
                 break;
-            case 13:
-                //캐릭터 선택창 - 캐릭터  삭제
-                nameList = (List<String>) value;
+            case 13: //캐릭터 선택창 - 캐릭터  삭제
+                nameList = gson.fromJson(String.valueOf(value), List.class);
+                // nameList = (List<String>) value;
 
 //                for(int i =0; i<nameList.size(); i++) {
 //                    System.out.println("nameList.get("+i+"): "+nameList.get(i));
@@ -116,8 +116,6 @@ public class LobbyController {
                 result = "null";
                 break;
         }
-
-        //System.out.println("key("+key+") - 조회 후: " + result);
         return result;
     }
 }

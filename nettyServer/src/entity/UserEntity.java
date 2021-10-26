@@ -1,7 +1,6 @@
 package entity;
 
 import vo.User;
-
 import java.sql.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /*
 DAO(Data Access Object) 클래스
@@ -27,6 +27,7 @@ public class UserEntity {
     ResultSet rs = null;
     Map<String, String> sendData = new HashMap<>();
 
+
     // 1: 로그인
     public Map<String, String> Login(User user) {
         String id = user.getId();
@@ -37,8 +38,7 @@ public class UserEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "select * from User where Name=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, user.getId().trim());
@@ -68,14 +68,12 @@ public class UserEntity {
                 System.out.println("아이디가 존재하지 않습니다.");
                 sendData.put("1", "아이디가 존재하지 않습니다.");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         isResult = false;
         return sendData;
     }
@@ -85,56 +83,56 @@ public class UserEntity {
     public Map<String, String> Verification(String name) {
         boolean isResult = false;
         String afterName = null;
-        System.out.println("UserEntity - Verification: " + name);
+        User user = new User();
+        user.setId(name);
+        System.out.println("UserEntity - Verification - id: " + user.getId().trim());
 
         try {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
-            String sql = "select * from User where Name=?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, name.trim());
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
+            String sqlplus = "select * from User where Name=?";
+            stmt = conn.prepareStatement(sqlplus);
+            stmt.setString(1, user.getId().trim());
 
             // 4. SQL 실행
             rs = stmt.executeQuery();
 
             // 5. 검색 결과 처리
             while (rs.next()) {
-                isResult = true;
-                afterName = rs.getString("Name");
                 System.out.println("Name: " + rs.getString("Name"));
+                System.out.println("Password: " + rs.getString("Password"));
+                afterName = rs.getString("Name");
+                isResult = true;
             }
 
-            System.out.println("isResult: " + isResult);
+            System.out.println("isResult: " + isResult+", afterName: "+afterName+", Verification - id: " + user.getId().trim());
             if (isResult) {
                 System.out.println("--- 검색 후 --");
                 System.out.println("id: " + afterName);
                 System.out.println("-----------------");
 
                 if (name.equals(afterName) == true) {
-                    System.out.println("존재하는 닉네임 입니다.");
+//                    System.out.println("존재하는 닉네임 입니다.");
                     sendData.put("2", "존재하는 닉네임 입니다.");
                 } else {
-                    System.out.println("사용가능한 닉네임 입니다.");
+//                    System.out.println("사용가능한 닉네임 입니다.");
                     sendData.put("2", "사용가능한 닉네임 입니다.");
                 }
-
             } else {
-                System.out.println("사용가능한 닉네임 입니다.");
+//                System.out.println("사용가능한 닉네임 입니다.");
                 sendData.put("2", "사용가능한 닉네임 입니다.");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         return sendData;
     }
+
 
     // 3: 회원가입창 - 회원가입
     public Map<String, String> Register(User user) {
@@ -142,8 +140,7 @@ public class UserEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "insert into User(Name, Password) values(?,?)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, user.getId().trim());
@@ -153,14 +150,12 @@ public class UserEntity {
             stmt.executeUpdate();
             System.out.println("회원가입이 완료되었습니다.");
             sendData.put("3", "회원가입이 완료되었습니다.");
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         return sendData;
     }
 
@@ -176,8 +171,7 @@ public class UserEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "select * from Player where Name=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, playerId.trim());
@@ -205,12 +199,10 @@ public class UserEntity {
                     System.out.println("사용가능한 닉네임 입니다.");
                     sendData.put("10", "사용가능한 닉네임 입니다.");
                 }
-
             } else {
                 System.out.println("사용가능한 닉네임 입니다.");
                 sendData.put("10", "사용가능한 닉네임 입니다.");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -220,6 +212,7 @@ public class UserEntity {
 
         return sendData;
     }
+
 
     // 11: 캐릭터 생성창 - 캐릭터 생성
     public Map<String, String> PlayerCreate(List<String> nameList) {
@@ -233,8 +226,7 @@ public class UserEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "insert into Player(UserID, Name, Gender, Lv, MaxLv, "
                     + "Money, HP, MaxHP, MP, MaxMP, EXP, MaxEXP,Attack,Defense, STR, DEX, CON, WIS, CreateDate) "
                     + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -275,6 +267,7 @@ public class UserEntity {
         return sendData;
     }
 
+
     // 12: 캐릭터 선택창 - 캐릭터 조회
     public Map<String, List<String>> PlayerCheck(String playerId) {
         System.out.println("PlayerCheck: "+playerId);
@@ -286,8 +279,7 @@ public class UserEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "select * from Player where UserID=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, playerId.trim());
@@ -298,7 +290,6 @@ public class UserEntity {
             // 5. 검색 결과 처리
             while (rs.next()) {
                 isResult = true;
-
                 player.add(rs.getString("UserID"));
                 player.add(rs.getString("Name"));
                 player.add(rs.getString("Gender"));
@@ -332,10 +323,10 @@ public class UserEntity {
             // 6. 연결 해제
             JDBCUtil.close(rs, stmt, conn);
         }
-
         return sendData;
     }
-    
+
+
     // 13: 캐릭터 선택창 - 캐릭터 삭제
     public Map<String, String> PlayerDelete(List<String> playerList) {
         System.out.println("PlayerDelete: "+playerList.get(0));
@@ -345,16 +336,14 @@ public class UserEntity {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
-            String sql = "delete from Player where NickName=?";
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
+            String sql = "delete from Player where Name=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, playerList.get(0).trim());
 
             // 4. SQL 실행
             stmt.executeUpdate();
             sendData.put("13", "캐릭터 삭제가 완료되었습니다.");
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -364,6 +353,7 @@ public class UserEntity {
 
         return sendData;
     }
+
 
     // 16: 캐릭터 돈 수정
     public void PlayerGoldUpdate(List<String> sellList) {
@@ -396,4 +386,67 @@ public class UserEntity {
         }
     }
 
+
+    // 22: 플레이어 정보 수정
+    public void PlayerUpdate(List<String> playerInfo) {
+        /**
+         [player 정보] - 캐릭터 정보 연동
+         UserID - 번호: 0 , 값: test
+         Name - 번호: 1 , 값: test1
+         Gender - 번호: 2 , 값: 남자 캐릭터
+         Lv - 번호: 3 , 값: 1
+         MaxLv - 번호: 4 , 값: 250
+         Money - 번호: 5 , 값: 10000
+         HP - 번호: 6 , 값: 200
+         MaxHP - 번호: 7 , 값: 200
+         MP - 번호: 8 , 값: 100
+         MaxMP - 번호: 9 , 값: 100
+         EXP - 번호: 10 , 값: 0
+         MaxEXP - 번호: 11 , 값: 100
+         Attack - 번호: 12 , 값: 10
+         Defense - 번호: 13 , 값: 5
+         STR - 번호: 14 , 값: 10
+         DEX - 번호: 15 , 값: 10
+         CON - 번호: 16 , 값: 10
+         WIS - 번호: 17 , 값: 10
+         */
+//        for (int i = 0; i < playerInfo.size(); i++){
+//            System.out.println("playerInfo["+i+"] - "+playerInfo.get(i));
+//        }
+
+        try {
+            // 2. Connection 연결(획득)
+            conn = JDBCUtil.getConnection();
+
+            // 3. Statement 생성 - 쿼리 참고: https://allg.tistory.com/23
+            String sql = "update Player set Lv=?, MaxLv=?, HP=?, MaxHP=?, MP=?, MaxMP=?, EXP=?, MaxEXP=?,Attack=?,Defense=?, STR=?, DEX=?, CON=?, WIS=? where Name=?";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, playerInfo.get(3).trim());
+            stmt.setString(2, playerInfo.get(4).trim());
+            stmt.setString(3, playerInfo.get(6).trim());
+            stmt.setString(4, playerInfo.get(7).trim());
+            stmt.setString(5, playerInfo.get(8).trim());
+            stmt.setString(6, playerInfo.get(9).trim());
+            stmt.setString(7, playerInfo.get(10).trim());
+            stmt.setString(8, playerInfo.get(11).trim());
+            stmt.setString(9, playerInfo.get(12).trim());
+            stmt.setString(10, playerInfo.get(13).trim());
+            stmt.setString(11, playerInfo.get(14).trim());
+            stmt.setString(12, playerInfo.get(15).trim());
+            stmt.setString(13, playerInfo.get(16).trim());
+            stmt.setString(14, playerInfo.get(17).trim());
+            stmt.setString(15, playerInfo.get(1).trim());
+
+            // 4. SQL 실행
+            stmt.executeUpdate();
+
+            System.out.println("플레이어 정보 수정 완료");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // 6. 연결 해제
+            JDBCUtil.close(rs, stmt, conn);
+        }
+    }
 }

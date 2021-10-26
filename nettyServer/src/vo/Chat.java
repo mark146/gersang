@@ -9,6 +9,7 @@ public class Chat implements Serializable {
     private String currentLocation;
     private String time;
 
+
     public String getPlayerId() {
         return playerId;
     }

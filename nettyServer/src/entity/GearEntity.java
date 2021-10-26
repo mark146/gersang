@@ -9,13 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class GearEntity {
     // JDBC 관련 변수
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
-    Map<String, String> sendData = new HashMap<>();
 
+
+    // 장비 생성
     public void GearCreate(String nickName) {
         try {
             // 2. Connection 연결(획득)
@@ -38,6 +40,8 @@ public class GearEntity {
         }
     }
 
+
+    // 장비 제거
     public void GearDelete(String nickName) {
         try {
             // 2. Connection 연결(획득)
@@ -61,8 +65,9 @@ public class GearEntity {
         }
     }
 
-    public List<String> GearOpen (String result) {
-        //System.out.println("GearOpen: "+result);
+
+    // 장비 정보 조회
+    public List<String> GearOpen(String result) {
         List<String> gear = new ArrayList<String>();
 
         try {
@@ -86,14 +91,6 @@ public class GearEntity {
                 gear.add(rs.getString("Ring_left"));
                 gear.add(rs.getString("Shoes"));
                 gear.add(rs.getString("ring_right"));
-
-//                System.out.println("Slot_1: " + rs.getString("Head"));
-//                System.out.println("Slot_2: " + rs.getString("Weapon"));
-//                System.out.println("Slot_3: " + rs.getString("Body"));
-//                System.out.println("Slot_4: " + rs.getString("Waist"));
-//                System.out.println("Slot_5: " + rs.getString("Ring_left"));
-//                System.out.println("Slot_6: " + rs.getString("Shoes"));
-//                System.out.println("Slot_7: " + rs.getString("ring_right"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -104,27 +101,35 @@ public class GearEntity {
         return gear;
     }
 
+
+    // 장비 정보 수정
     public Map<String, String> GearUpdate(String userID, List<String> gearList) {
         System.out.println("GearUpdate: "+userID);
         Map<String, String> sendData = new HashMap<String, String>();
+
+//        for(int i =0; i<gearList.size();i++) {
+//            System.out.println("GearUpdate["+i+"]: "+gearList.get(i));
+//        }
 
         try {
             // 2. Connection 연결(획득)
             conn = JDBCUtil.getConnection();
 
-            // 3. Statement 생성
-            // 쿼리 참고: https://sas-study.tistory.com/160
+            // 3. Statement 생성 - 쿼리 참고: https://sas-study.tistory.com/160
             String sql = "update Gear set Head=?, Weapon=?, "
                     + "Body=?, Waist=?, Ring_left=?, Shoes=?, ring_right=? where UserID=?";
             stmt = conn.prepareStatement(sql);
-            for(int i =0; i <gearList.size();i++) {
-                stmt.setString(i+1, gearList.get(i).trim());
-            }
+            stmt.setString(1, gearList.get(0).trim());
+            stmt.setString(2, gearList.get(1).trim());
+            stmt.setString(3, gearList.get(2).trim());
+            stmt.setString(4, gearList.get(3).trim());
+            stmt.setString(5, gearList.get(4).trim());
+            stmt.setString(6, gearList.get(5).trim());
+            stmt.setString(7, gearList.get(6).trim());
             stmt.setString(8, userID.trim());
 
             // 4. SQL 실행
             stmt.executeUpdate();
-
             sendData.put("9", "장비 정보가 수정되었습니다.");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -134,5 +139,4 @@ public class GearEntity {
         }
         return sendData;
     }
-
 }

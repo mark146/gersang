@@ -10,7 +10,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/gson-2.8.6.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/jackson-annotations-2.11.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -19,7 +19,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/jackson-annotations-2.11.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/mysql-connector-java-8.0.21.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -28,7 +28,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/jackson-core-2.11.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/gson-2.8.6.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -37,7 +37,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/json-simple-3.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/json-simple-3.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -46,7 +46,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/jackson-databind-2.11.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/jackson-core-2.11.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -55,7 +55,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/mysql-connector-java-8.0.21.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/flatbuffers-plugin-0.3+21.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -64,7 +64,16 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/netty-all-4.1.51.Final.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/jackson-databind-2.11.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../JavaProject/lib/netty-all-4.1.51.Final.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
