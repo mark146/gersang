@@ -1,6 +1,6 @@
 # 거상(모작)
 
-## 프로젝트 개요
+### 프로젝트 개요
 
 - 서비스 소개
 	- 2D 게임 거상을 3D로 재구성한 프로젝트
@@ -13,7 +13,7 @@
 	- 2020.05.01 ~ 2020.08.01 (3개월)
 
 
-## 사용 기술
+### 사용 기술
 - 언어
 	- JAVA, C#
 
@@ -30,12 +30,12 @@
 	- Netty, Flatbuffers, Jdbc, Gson
 
 
-## 서비스 구성도
+### 서비스 구성도
 
 ![거상_아키텍처](https://user-images.githubusercontent.com/24368929/138806183-ca70cd42-c6b8-4696-b64a-b46aaec30d6c.PNG)
 
 
-##주요 기능
+### 주요 기능
 #### 1. 캐릭터 생성 / 삭제
 
 ![거상_캐릭터](https://user-images.githubusercontent.com/24368929/138806107-a79355b4-0662-4bda-8a5d-dd6cb7217650.PNG)
@@ -52,4 +52,4 @@
 
 ![거상_전투기능](https://user-images.githubusercontent.com/24368929/138806143-4b33ada2-4843-4410-8757-8724fb51c7df.PNG)
 
-##시연 영상 링크
+### 시연 영상 링크
