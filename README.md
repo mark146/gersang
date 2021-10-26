@@ -51,5 +51,3 @@
 #### 4. 전투
 
 ![거상_전투기능](https://user-images.githubusercontent.com/24368929/138806143-4b33ada2-4843-4410-8757-8724fb51c7df.PNG)
-
-### 시연 영상 링크
