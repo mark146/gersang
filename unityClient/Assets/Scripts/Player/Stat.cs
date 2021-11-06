@@ -58,6 +58,16 @@ public class Stat : MonoBehaviour
         }
     }
 
+    public void OnSkillAttacked(int damage)
+    {
+        Hp -= damage;
+
+        if (Hp <= 0)
+        {
+            Hp = 0;
+        }
+    }
+
     void OnDead(Stat attacker)
     {
 

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
@@ -15,13 +16,12 @@ namespace ServerCore
     {
         Socket _socket;
         int _disconnected = 0;
-
         object _lock = new object();
         Queue<byte[]> _sendQueue = new Queue<byte[]>();
         List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
         SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
         SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
-
+        
         public void Start(Socket socket)
         {
             _socket = socket;
@@ -35,16 +35,21 @@ namespace ServerCore
             RegisterRecv();
         }
 
-        public void Send(byte[] sendBuff)
-        {
-
-            lock (_lock)
+        public void Send(byte[] sendBuff) {
+            try
             {
-                _sendQueue.Enqueue(sendBuff);
+                lock (_lock)
+                {
+                    _sendQueue.Enqueue(sendBuff);
 
-                if (_pendingList.Count == 0)
-                    RegisterSend();
+                    if (_pendingList.Count == 0)
+                        RegisterSend();
+                }
+            } catch(Exception e)
+            {
+                Debug.Log($"Send Failed {e}");
             }
+
         }
 
         public void Disconnect()
@@ -88,15 +93,11 @@ namespace ServerCore
             }
         }
 
-        void OnSendCompleted(object sender, SocketAsyncEventArgs args)
-        {
-            lock (_lock)// 콜백 함수 때문에 락처리
-            {
+        void OnSendCompleted(object sender, SocketAsyncEventArgs args) {
+            lock (_lock) { // 콜백 함수 때문에 락처리
                 // 몇 바이트를 받았는가? 0바이트 의경우(연결 끊을 경우)
-                if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
-                {
-                    try
-                    {
+                if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success) {
+                    try {
                         _sendArgs.BufferList = null;
                         _pendingList.Clear();
 
@@ -106,78 +107,62 @@ namespace ServerCore
                         //누군가가 만약 예약을 또 했다면 다시한번 작업을 처리(다시 한번 체크)
                         if (_sendQueue.Count > 0)
                             RegisterSend();
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         Debug.Log($"OnSendCompleted Failed {e}");
                     }
-                }
-                else
-                {
+                } else {
                     Disconnect();// 상대방에게 문제가 있으니 연결 제거
                 }
             }
         }
 
-        void RegisterRecv()
-        {
-            if (_disconnected == 1)//멀티스레드 예외처리
-                return;
+        void RegisterRecv() {
 
-            try
-            {
+            //멀티스레드 예외처리
+            if (_disconnected == 1) {
+                return;
+            }
+                
+            try {
                 bool pending = _socket.ReceiveAsync(_recvArgs);
                 if (pending == false)
                     OnRecvCompleted(null, _recvArgs);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Debug.Log($"RegisterRecv Failed {e}");
             }
         }
 
-        void OnRecvCompleted(object sender, SocketAsyncEventArgs args)
-        {
-            lock (_lock)// 콜백 함수 때문에 락처리
-            {
-                if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
-                {
-                    try
-                    {
+        void OnRecvCompleted(object sender, SocketAsyncEventArgs args) {
+            lock (_lock) {// 콜백 함수 때문에 락처리
+                if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success) {
+                    try {
                         string recvData = null;
                         //TODO - 받은 데이터를 처리하는 부분
                         recvData = Encoding.UTF8.GetString(args.Buffer, args.Offset, args.BytesTransferred);
-                        //Debug.Log($"[From Server]: {recvData}");
+                        // Debug.Log($"[From Server]: {recvData}");
 
                         //Newtonsoft.Json 라이브러리 사용해서 json 역직렬화 처리
                         Dictionary<int, object> result = JsonConvert.DeserializeObject<Dictionary<int, object>>(recvData);
-
-                        foreach (int Key in result.Keys)
+                        //참고: https://ponyozzang.tistory.com/325
+                        foreach (KeyValuePair<int, object> recv in result)
                         {
-                           // Debug.Log("Key: " + Key);
-                           // Debug.Log("result.Values: " + result.Values);
-
-                            //서버에게 받은 결과값 큐에 전송
-                            Queue.Instance.Push(result);
-
-                            //string value = (string)result[Key];
+                            //Debug.Log($"KeyValuePair - Key: {recv.Key}, Value:{recv.Value}");
+                            Dictionary<int, object> recvMap = new Dictionary<int, object>();
+                            recvMap.Add(recv.Key, recv.Value);
+                            Queue.Instance.Push(recvMap);
                         }
 
-
-
+                    } catch (Exception e) {
+                        Debug.Log($"OnRecvCompleted Failed {e}");
+                
+                    } finally
+                    {
                         RegisterRecv();
                     }
-                    catch (Exception e)
-                    {
-                        Debug.Log($"OnRecvCompleted Failed {e}");
-                    }
-                }
-                else
-                {
+                } else {
                     Disconnect();
                 }
             }
-
         }
 
         #endregion

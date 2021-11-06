@@ -38,12 +38,6 @@ public class MonsterController : BaseController
         }
     }
 
-
-    private void UpdateDie()
-    {
-        Debug.Log($"UpdateDie 실행 - {transform.name}");
-    }
-
     // 가만히 있다가 주변에 플레이어가 있는지 서칭 발견하면 이동
     protected override void UpdateIdle()
     {
@@ -161,7 +155,9 @@ public class MonsterController : BaseController
 
                 //죽은 유닛 리스트에서 제거
                 BattleScene scene = GameObject.Find("@BattleScene").GetComponent<BattleScene>();
-                scene.unitList.Remove(_lockTarget);
+                scene.battleunitList.Remove(_lockTarget);
+                scene.unitsSelected.Remove(_lockTarget.GetComponent<Unit>());
+                scene.UnitInfo(_lockTarget.GetComponent<Unit>());
 
                 _lockTarget = null;
                 State = Define.State.Idle;
@@ -188,6 +184,7 @@ public class MonsterController : BaseController
             State = Define.State.Idle;
         }
     }
+    
     private void DestroyObject()
     {
         Destroy(DamageText.gameObject);

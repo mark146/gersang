@@ -35,6 +35,9 @@ public class Define
         Wall = 9,
         Monster = 10,
         Store = 11,
+        Clinic = 12,
+        Training_school = 13,
+        Dungeon = 14,
     }
 
     public enum CameraMode

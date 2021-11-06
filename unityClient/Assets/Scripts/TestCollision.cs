@@ -22,11 +22,6 @@ public class TestCollision : MonoBehaviour
         Debug.Log($"Trigger @ {other.gameObject.name} !");
     }
 
-    void Start()
-    {
-
-    }
-
     void Update()
     {
         /*

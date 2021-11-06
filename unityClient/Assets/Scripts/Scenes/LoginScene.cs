@@ -1,12 +1,7 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement; // Scene 전환을 하기 위해 필요
 using UnityEngine.UI;
@@ -22,7 +17,7 @@ public class LoginScene : MonoBehaviour
     GameObject alertView;
     User user;
 
-    private void Start()
+    private void Awake()
     {
         //로그인 버튼에 이벤트 추가
         GameObject login = GameObject.Find("LoginButton").gameObject;
@@ -34,6 +29,17 @@ public class LoginScene : MonoBehaviour
 
         idField = GameObject.Find("ID");
         passwordField = GameObject.Find("Password");
+
+        // test
+        //net = GameObject.Find("@NetworkManager");
+        //if (net == null)
+        //{
+        //    net = new GameObject { name = "@NetworkManager" };
+        //    net.AddComponent<NetworkManager>();
+        //}
+
+        //// 네트워크 매니저 send 메소드 접근
+        //network = net.GetComponent<NetworkManager>();
     }
 
     /*
@@ -82,12 +88,12 @@ public class LoginScene : MonoBehaviour
                 user.Password = "null";
             }
 
-            /* register - 1 */
-            Dictionary<int, User> player = new Dictionary<int, User>();
-            player.Add(1, user);
+            ///* register - 1 */
+            //Dictionary<int, User> player = new Dictionary<int, User>();
+            //player.Add(1, user);
 
             // 서버에 데이터 전송
-            network.LoginSend(player);
+            network.LoginSend(user);
         }
         catch (Exception e)
         {
@@ -101,7 +107,7 @@ public class LoginScene : MonoBehaviour
         SceneManager.LoadScene("RegisterScene");
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         List<Dictionary<int, object>> list = Queue.Instance.PopAll();// 꺼내옴
         foreach (Dictionary<int, object> result in list)
@@ -109,6 +115,7 @@ public class LoginScene : MonoBehaviour
             foreach (int Key in result.Keys)
             {
                 //Debug.Log("LoginScene - Key: " + Key);
+                //Debug.Log("LoginScene - result[Key]: " + result[Key]);
 
                 //Newtonsoft.Json 라이브러리 사용해서 json 직렬화 처리
                 string value = JsonConvert.SerializeObject(result[Key]);
@@ -127,7 +134,7 @@ public class LoginScene : MonoBehaviour
     IEnumerator Delay(string result)
     {
         yield return new WaitForSeconds(0.5f);
-        Debug.Log($"RecvRegister - result: {result}");
+//        Debug.Log($"RecvRegister - result: {result}");
 
         if (result == "아이디가 존재하지 않습니다.")
         {
@@ -186,5 +193,11 @@ public class LoginScene : MonoBehaviour
 
         // 프리팹 제거
         Managers.Resource.Destroy(lodingView); 
+    }
+
+    private void OnDestroy()
+    {
+        StopCoroutine("Delay");
+        // Debug.Log($"LoginScene OnDestroy 실행");   
     }
 }

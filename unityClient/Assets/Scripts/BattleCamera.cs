@@ -8,19 +8,12 @@ public class BattleCamera : MonoBehaviour
     float spped;
     float zoomSpeed;
     float rotateSpeed;
-
     float maxHeight = 20f;
     float minHeight = 4f;
-  
-    void Start()
-    {
-
-    }
-
-
+    
+    
     void Update()
     {
-
         // 카메라 제어
         CameraControl();
     }

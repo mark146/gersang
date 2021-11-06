@@ -1,15 +1,14 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 // 오브젝트에 물리를 적용하기 위해선 리지드 바디를 적용해줘야함
-public class PlayerController : MonoBehaviour
-{
+public class PlayerController : MonoBehaviour {
     [SerializeField]
     float _speed = 10.0f;
 
-    int _mask = (1 << (int)Define.Layer.Ground) | (1 << (int)Define.Layer.Wall) | (1 << (int)Define.Layer.Store);
+    int _mask = (1 << (int)Define.Layer.Ground) | (1 << (int)Define.Layer.Wall) | (1 << (int)Define.Layer.Store) | (1 << (int)Define.Layer.Training_school) | (1 << (int)Define.Layer.Clinic) | (1 << (int)Define.Layer.Dungeon);
 
     [SerializeField]
     protected Vector3 _destPos;// 이동 목적지
@@ -24,35 +23,46 @@ public class PlayerController : MonoBehaviour
     bool isInven = false;
     NetworkManager _network;
     GameObject characterInfo;
+    Object _lock = new Object();
+    Animator anim;
 
-
-    public virtual Define.State State
-    {
+    public virtual Define.State State {
         get { return _state; }
-        set
-        {
+        set {
             _state = value;
-
-            Animator anim = GetComponent<Animator>();
-            switch (_state)
-            {
+            // Debug.Log($"PlayerController - _network.player[2] {_network.player[2]}");
+            if(_network.player[2].Equals("남자 캐릭터") == true) {
+                GameObject gender = GameObject.Find("Player_Male(Clone)");
+                if(gender != null) {
+                    anim = gender.transform.GetComponent<Animator>();
+                }
+            } else {
+                GameObject gender = GameObject.Find("Player_Female(Clone)");
+                //anim = gender.transform.GetComponent<Animator>();
+                if (gender != null) {
+                    anim = gender.transform.GetComponent<Animator>();
+                }
+            }
+            
+            switch (_state) {
                 case Define.State.Die:
                     break;
                 case Define.State.Idle:
-                    // anim.CrossFade("Idle", 0.1f);
+                    anim.CrossFade("Idle", 0.1f);
                     break;
                 case Define.State.Moving:
-                    // anim.CrossFade("Run", 0.1f);
+                    anim.CrossFade("Run", 0.1f);
                     break;
                 case Define.State.Skill:
-                    // anim.CrossFade("Attack", 0.1f, -1, 0);
+                    anim.CrossFade("Attack", 0.1f, -1, 0);
                     break;
             }
         }
     }
 
-    void Start()
-    {
+    void Start() {
+        // Debug.Log($"PlayerController - Start");
+
         //구독 신청: InputManager 한테 어떤 키보드 이벤트가 실행되면 OnKeyBoard 함수를 실행해주세요 하고 요청
         // -=: 실수로 다른 부분에서 구독 신청하면 두번 호출되는데 이 현상 방지 목적
         Managers.Input.KeyAction -= OnKeyBoard;
@@ -62,46 +72,54 @@ public class PlayerController : MonoBehaviour
         Managers.Input.MouseAction -= OnMouseEvent;
         Managers.Input.MouseAction += OnMouseEvent;
 
-        _network = GameObject.Find("@NetworkManager").GetComponent<NetworkManager>();
+        //NetworkManager 검색 후 객체 생성
+        GameObject net = GameObject.Find("@NetworkManager");
+        _network = net.GetComponent<NetworkManager>();
 
-        Player player = new Player();
-        player.Id = _network.Id; //이름은 나중에 데이터 연동
-        player.x = transform.position.x;
-        player.y = transform.position.y;
-        player.z = transform.position.z;
+        if (_network.playerInfo == null) {
+            // Debug.Log("_network.playerInfo null 일 경우");
+            Player player = new Player();
+            player.Id = _network.player[1];
+            player.Gender = _network.player[2];
+            player.State = _state.ToString();
+            player.x = transform.position.x;
+            player.y = transform.position.y;
+            player.z = transform.position.z;
 
-        // Debug.Log($"x: {player.x} y: {player.y} z: {player.z}");
-
-        // 전송
-        Dictionary<int, Player> add = new Dictionary<int, Player>();
-        add.Add(5, player);
-        _network.UserAdd(add);
+            // 플레이어 정보 서버에 전송
+            _network.UserAdd(player);
+        } else {
+            Debug.Log("_network.playerInfo null 이 아닐 경우");
+        }
     }
 
     // FixedUpdate 함수는 고정프레임마다 실행
-    void FixedUpdate()
-    {
+    void FixedUpdate() {
         // 플레이어 상태에 따라 분기가 나뉘어짐
-        switch (State)
-        {
+        switch (State) {
             case Define.State.Die:
                 UpdateDie();
                 break;
             case Define.State.Moving:
                 UpdateMoving();
 
-                Player player = new Player();
-                player.Id = _network.Id; //이름은 나중에 데이터 연동
-                player.x = transform.position.x;
-                player.y = transform.position.y;
-                player.z = transform.position.z;
+                lock (_lock) {
+                    Player player = new Player();
+                    player.Id = _network.player[1];
+                    player.Gender = _network.player[2];
+                    player.State = _state.ToString();
+                    player.DestPos_x = _destPos.x;
+                    player.DestPos_y = _destPos.y;
+                    player.DestPos_z = _destPos.z;
+                    player.x = transform.position.x;
+                    player.y = transform.position.y;
+                    player.z = transform.position.z;
 
-                // Debug.Log($"x: {player.x} y: {player.y} z: {player.z}");
-
-                // 전송
-                Dictionary<int, Player> move = new Dictionary<int, Player>();
-                move.Add(4, player);
-                _network.MoveSend(move);
+                    // 서버에 캐릭터 이동 정보 전송
+                    //Dictionary<int, Player> move = new Dictionary<int, Player>();
+                    //move.Add(4, player);
+                    _network.MoveSend(player);
+                }
                 break;
             case Define.State.Idle:
                 UpdateIdle();
@@ -111,11 +129,9 @@ public class PlayerController : MonoBehaviour
                 break;
         }
 
-        // 인벤토리
-        if (Input.GetKey(KeyCode.I))
-        {
-            if (isInven == false)
-            {
+        // I키를 누를 경우 인벤토리창 실행
+        if (Input.GetKey(KeyCode.I)) {
+            if (isInven == false) {
                 isInven = true;
                 StartCoroutine(InfoStart());
             }
@@ -123,16 +139,12 @@ public class PlayerController : MonoBehaviour
     }
 
     // 참고: https://hyunity3d.tistory.com/380
-    private IEnumerator InfoStart()
-    {
-        if (characterInfo == null)
-        {
+    private IEnumerator InfoStart() {
+        if (characterInfo == null) {
             characterInfo = Managers.Resource.Instantiate("CharacterInfo");
             yield return new WaitForSeconds(0.2f);
             isInven = false;
-        }
-        else
-        {
+        } else {
             Managers.Resource.Destroy(characterInfo);
             characterInfo = null;
             yield return new WaitForSeconds(0.2f);
@@ -160,25 +172,21 @@ public class PlayerController : MonoBehaviour
     transform.Translate(Vector3.forward * Time.deltaTime * _speed);
     이슈: 원하는 방향으로 보면서 이동은 하는데 좀 커브형으로 이동 및 튀는 현상 발생 -> 왜? Slerp() 눌러도 바로 이동하는게 아니라 쳐다보고 이동
     */
-    void OnKeyBoard()
-    {
-        if (Input.GetKey(KeyCode.W))
-        {
+    void OnKeyBoard() {
+        if (Input.GetKey(KeyCode.W)) {
             // 바라보는 방향과 상관없이 월드좌표 기준으로 이동
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.forward), 0.2f);
             transform.position += Vector3.forward * Time.deltaTime * _speed; // 예약어를 사용해서 처리
         }
-        if (Input.GetKey(KeyCode.S))
-        {
+        if (Input.GetKey(KeyCode.S)) {
             // transform.position -= new Vector3(0.0f, 0.0f, 1.0f) * Time.deltaTime * _speed;
             // transform.Translate(Vector3.back * Time.deltaTime * _speed);
 
-            //원하는 방향으로 보면서 이동
+            //원하는 방향으로 보면서 이동, null 이 아니라면 실행. 참고: https://answers.unity.com/questions/1015411/missingreferenceexception-the-object-of-type-text.html
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.back), 0.2f);
             transform.position += Vector3.back * Time.deltaTime * _speed;
         }
-        if (Input.GetKey(KeyCode.A))
-        {
+        if (Input.GetKey(KeyCode.A)) {
             // transform.position -= new Vector3(1.0f, 0.0f, 0.0f) * Time.deltaTime * _speed;
             // transform.Translate(Vector3.left * Time.deltaTime * _speed);
 
@@ -186,8 +194,7 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Vector3.left), 0.2f);
             transform.position += Vector3.left * Time.deltaTime * _speed;
         }
-        if (Input.GetKey(KeyCode.D))
-        {
+        if (Input.GetKey(KeyCode.D)) {
             // transform.position += new Vector3(1.0f, 0.0f, 0.0f) * Time.deltaTime * _speed;
             // transform.Translate(Vector3.right * Time.deltaTime * _speed);
 
@@ -198,10 +205,9 @@ public class PlayerController : MonoBehaviour
     }
 
     // 3. 마우스 이벤트 처리
-    void OnMouseEvent(Define.MouseEvent evt)
-    {
-        switch (State)
-        {
+    void OnMouseEvent(Define.MouseEvent evt) {
+        // Debug.Log($"OnMouseEvent - State: {State}");
+        switch (State) {
             case Define.State.Idle:
                 OnMouseEvent_IdleRun(evt);
                 break;
@@ -226,24 +232,47 @@ public class PlayerController : MonoBehaviour
     }
 
     // 4. 마우스 이벤트 처리
-    void UpdateMoving()
-    {
+    void UpdateMoving() {
         // 몬스터가 내 사정거리보다 가까우면 공격
-        if (_lockTarget != null)
-        {
-         
+        if (_lockTarget != null) {
             _destPos = _lockTarget.transform.position; // 몬스터와 플레이어 간의 거리 값
             float distance = (_destPos - transform.position).magnitude;
 
-
+            //Debug.Log($"UpdateMoving - _lockTarget.transform: " + _lockTarget.transform.name);
             // 플레이어와 상점 간의 거리가 가까우면 정지
-            if (_lockTarget.transform.name.Equals("store") == true && distance <= 3)
-            {
-                Debug.Log("_lockTarget.transform: " + _lockTarget.transform.name);
+            if (_lockTarget.transform.name.Equals("store") == true && distance <= 3) {
+                Debug.Log($"PlayerController_상점 클릭시 실행 - {_lockTarget.transform.name}");
                 Managers.Resource.Instantiate("ShopUI");
                 isInven = true;
                 StartCoroutine(InfoStart());
-                //State = Define.State.Skill;
+                State = Define.State.Idle;
+                return;
+            }
+
+            // 플레이어와 의료소 간의 거리가 가까우면 정지
+            if (_lockTarget.transform.name.Equals("clinic") == true && distance <= 3) {
+                Debug.Log($"PlayerController_의료소 클릭시 실행 - {_lockTarget.transform.name}");
+
+                State = Define.State.Idle;
+                return;
+            }
+
+            if (_lockTarget.transform.name.Equals("training_school") == true && distance <= 3) {
+                Debug.Log($"1. PlayerController_훈련소 클릭시 실행 - {_lockTarget.transform.name}");
+
+                // 2.만들어둔 훈련소 화면을 호출해서 화면에 출력한다.
+                Managers.Resource.Instantiate("Training_school");
+                State = Define.State.Idle;
+                return;
+            }
+
+            if (_lockTarget.transform.name.Equals("dungeon") == true && distance <= 3) {
+                Debug.Log($"던전 클릭시 실행 - {_lockTarget.transform.name}");
+
+                // 던전 들어가기 전 정보 수정할 부분 : 캐릭터 위치, 타 플레이어 에게 안보이게 설정
+
+                // 전투 화면으로 이동
+                SceneManager.LoadScene("BattleScene");
                 State = Define.State.Idle;
                 return;
             }
@@ -254,12 +283,10 @@ public class PlayerController : MonoBehaviour
         dir.y = 0;
 
         // 목적지에 도달하면 멈춤
-        if (dir.magnitude < 0.1f) //0.0001f 벡터 계산은 오차 범위가 있어서 0이 아닌 숫자로 설정
-        {
+        //0.0001f 벡터 계산은 오차 범위가 있어서 0이 아닌 숫자로 설정
+        if (dir.magnitude < 0.1f) {
             State = Define.State.Idle;
-        }
-        else
-        {
+        } else {
             // 이동 강의 참고, 아니면 계속 이동, NavMeshAgent: 길찾기 지원 클래스
             // NavMeshAgent nma = gameObject.GetOrAddComponent<NavMeshAgent>();
             // float moveDist = Mathf.Clamp(_stat.MoveSpeed * Time.deltaTime, 0, dir.magnitude); // moveDist 이 함수를 안 넣으면 목적지에서 혼자 부들부들 거리는 현상 발생
@@ -270,11 +297,9 @@ public class PlayerController : MonoBehaviour
 
             //Raycast 파라미터: 내위치, 목적지, 감지 거리, 레이아웃 이름
             // transform.position + Vector3.up *0.5f : 플레이어 배꼽 위치
-            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, dir, 1.0f, LayerMask.GetMask("Block")))
-            {
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, dir, 1.0f, LayerMask.GetMask("Block"))) {
                 // 마우스를 누르고 있다면 안변하게 설정
-                if (Input.GetMouseButton(0) == false)
-                {
+                if (Input.GetMouseButton(0) == false) {
                     State = Define.State.Idle;
                 }
                 return;
@@ -288,28 +313,25 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void UpdateSkill()
-    {
+    void UpdateSkill() {
         Debug.Log("UpdateSkill");
 
         // 고개를 몬스터 쪽으로 돌려줌
-        if (_lockTarget != null)
-        {
+        if (_lockTarget != null) {
             Vector3 dir = _lockTarget.transform.position - transform.position;
             Quaternion quat = Quaternion.LookRotation(dir);
             transform.rotation = Quaternion.Lerp(transform.rotation, quat, 20 * Time.deltaTime);
         }
     }
 
-    void UpdateIdle()
-    {
+    void UpdateIdle() {
+        State = Define.State.Idle;
         //애니메이션 처리
         //Animator anim = GetComponent<Animator>();
         // anim.SetFloat("speed", 0);
     }
 
-    void OnMouseEvent_IdleRun(Define.MouseEvent evt)
-    {
+    void OnMouseEvent_IdleRun(Define.MouseEvent evt) {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -317,10 +339,9 @@ public class PlayerController : MonoBehaviour
         bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
 
         // PointerDown
-        // Debug.Log("MouseEvent 값: " + evt);
-        //Debug.Log("raycastHit 값: " + raycastHit);
-        switch (evt)
-        {
+        // Debug.Log("OnMouseEvent_IdleRun - MouseEvent 값: " + evt);
+        // Debug.Log("OnMouseEvent_IdleRun - raycastHit 값: " + raycastHit);
+        switch (evt) {
             // 마우스를 땐 상태에서 처음 클릭할 경우
             case Define.MouseEvent.PointerDown:
                 {
@@ -331,20 +352,30 @@ public class PlayerController : MonoBehaviour
                         State = Define.State.Moving;
                         _stopSkill = false;
 
+                        //Debug.Log("State 값 : " + State);
                         //Debug.Log("hit.layer 값 : " + hit.collider.gameObject.layer);
-                 
 
-                        // 몬스터를 클릭할 경우 
-                        if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
+                        // 타겟 클릭시 대상 지정
+                        switch (hit.collider.gameObject.layer)
                         {
-                            //Debug.Log("Monster 클릭");
-                            _lockTarget = hit.collider.gameObject;
-                        } else if (hit.collider.gameObject.layer == (int)Define.Layer.Store) {
-                            //상점 클릭할 경우 
-                            _lockTarget = hit.collider.gameObject;
-                        } else
-                        {
-                            _lockTarget = null;
+                            case (int)Define.Layer.Monster:
+                                _lockTarget = hit.collider.gameObject;
+                                break;
+                            case (int)Define.Layer.Store:
+                                _lockTarget = hit.collider.gameObject;
+                                break;
+                            case (int)Define.Layer.Dungeon:
+                                _lockTarget = hit.collider.gameObject;
+                                break;
+                            case (int)Define.Layer.Clinic:
+                                _lockTarget = hit.collider.gameObject;
+                                break;
+                            case (int)Define.Layer.Training_school:
+                                _lockTarget = hit.collider.gameObject;
+                                break;
+                            default:
+                                _lockTarget = null;
+                                break;
                         }
                     }
                 }
@@ -361,8 +392,18 @@ public class PlayerController : MonoBehaviour
                 break;
             case Define.MouseEvent.PointerUp:
                 _stopSkill = true;
-                Debug.Log("OnMouseEvent_IdleRun PointerUp");
+                //Debug.Log("OnMouseEvent_IdleRun PointerUp");
                 break;
         }
+    }
+
+    void OnDisable()
+    {
+        Debug.Log($"PlayerController - OnDisable");
+    }
+    
+    void OnDestroy()
+    {
+        Debug.Log($"PlayerController - OnDestroy");
     }
 }

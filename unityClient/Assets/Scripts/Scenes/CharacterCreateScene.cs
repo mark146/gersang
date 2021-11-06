@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class CharacterCreateScene : MonoBehaviour
-{
+// UI 수정
+public class CharacterCreateScene : MonoBehaviour {
     InputField nickname;
     GameObject detail;
     GameObject characterInfoImage;
@@ -18,8 +16,7 @@ public class CharacterCreateScene : MonoBehaviour
     NetworkManager network;
     bool isname = false;
 
-    void Start()
-    {
+    void Start() {
         //이벤트 추가
         GameObject back = GameObject.Find("BackButton").gameObject;
         back.GetComponent<Button>().onClick.AddListener(BackAction);
@@ -61,14 +58,11 @@ public class CharacterCreateScene : MonoBehaviour
             foreach (int Key in result.Keys)
             {
                 object value = result[Key];
-                Debug.Log("Key: " + Key);
-                Debug.Log("value: " + value);
+                // Debug.Log($"Key: {Key} value: {value}");
                 string recv = value as string;
-                if (recv.Equals("캐릭터 생성이 완료되었습니다.") == true)
-                {
+                if (recv.Equals("캐릭터 생성이 완료되었습니다.") == true) {
                     SceneManager.LoadScene("CharacterSelectScene");
-                } else
-                {
+                } else {
                     StartCoroutine(Delay(recv));
                 }
             }
@@ -76,44 +70,50 @@ public class CharacterCreateScene : MonoBehaviour
     
     }
 
-    IEnumerator Delay(string result)
-    {
+    IEnumerator Delay(string result) {
         yield return new WaitForSeconds(0.1f);
 
         Text name = GameObject.Find("NameResult").GetComponent<Text>();
-        if (result == "사용가능한 닉네임 입니다.")
-        {
-            name.text = result;
-            isname = true;
-        }
-        else if (result == "존재하는 닉네임 입니다.")
-        {
-            name.text = result;
-            isname = false;
+
+        //if (result == "사용가능한 닉네임 입니다.") {
+        //    name.text = result;
+        //    isname = true;
+        //} else if (result == "존재하는 닉네임 입니다.") {
+        //    name.text = result;
+        //    isname = false;
+        //}
+
+        switch (result) {
+            case "사용가능한 닉네임 입니다.":
+                name.text = result;
+                isname = true;
+                break;
+            case "존재하는 닉네임 입니다.":
+                name.text = result;
+                isname = false;
+                break;
+            default:
+                break;
         }
     }
 
-    private void V1Action()
-    {
+    private void V1Action() {
         Debug.Log("V1Action 클릭");
         detail.GetComponent<Text>().text = "남자 캐릭터";
 
-        if (characterMale == null && characterFemale == null)
-        {
+        if (characterMale == null && characterFemale == null) {
             characterMale = Managers.Resource.Instantiate("CharacterMale");
             characterMale.transform.SetParent(characterInfoImage.transform);
             characterMale.SetActive(true);
             RectTransform rt = (RectTransform)characterMale.transform;
-            rt.anchoredPosition = new Vector3(0f, 0f);
-        }
-        else if (characterMale == null && characterFemale != null)
-        {
+            rt.anchoredPosition = new Vector3(0f, 99f);
+        } else if (characterMale == null && characterFemale != null) {
             Managers.Resource.Destroy(characterFemale);
             characterMale = Managers.Resource.Instantiate("CharacterMale");
             characterMale.transform.SetParent(characterInfoImage.transform);
             characterMale.SetActive(true);
             RectTransform rt = (RectTransform)characterMale.transform;
-            rt.anchoredPosition = new Vector3(0f, 0f);
+            rt.anchoredPosition = new Vector3(0f, 99f);
         }
     }
 
@@ -122,22 +122,19 @@ public class CharacterCreateScene : MonoBehaviour
         Debug.Log("V2Action 클릭");
         detail.GetComponent<Text>().text = "여자 캐릭터";
 
-        if (characterFemale == null && characterMale == null)
-        {
+        if (characterFemale == null && characterMale == null) {
             characterFemale = Managers.Resource.Instantiate("CharacterFemale");
             characterFemale.transform.SetParent(characterInfoImage.transform);
             characterFemale.SetActive(true);
             RectTransform rt = (RectTransform)characterFemale.transform;
-            rt.anchoredPosition = new Vector3(0f, 0f);
-        }
-        else if (characterMale != null && characterFemale == null)
-        {
+            rt.anchoredPosition = new Vector3(0f, 99f);
+        } else if (characterMale != null && characterFemale == null) {
             Managers.Resource.Destroy(characterMale);
             characterFemale = Managers.Resource.Instantiate("CharacterFemale");
             characterFemale.transform.SetParent(characterInfoImage.transform);
             characterFemale.SetActive(true);
             RectTransform rt = (RectTransform)characterFemale.transform;
-            rt.anchoredPosition = new Vector3(0f, 0f);
+            rt.anchoredPosition = new Vector3(0f, 99f);
         }
     }
 
@@ -147,58 +144,48 @@ public class CharacterCreateScene : MonoBehaviour
         SceneManager.LoadScene("CharacterSelectScene");
     }
 
-    void CreateAction()
-    {
+    void CreateAction() {
         Debug.Log("캐릭터 생성 클릭");
 
-        List<string> nameList = new List<string>();
-        Dictionary<int, List<string>> sendData = new Dictionary<int, List<string>>();
-        nameList.Add(network.Id.Trim());
-        Debug.Log("network.Id: " + network.Id);
-
+        /*
+         0: 플레이어 아이디
+         1: 캐릭터 이름
+         2: 캐릭터 성별
+        */
+        List<string> playerInfoList = new List<string>();
+        playerInfoList.Add(network.Id.Trim()); 
 
         if (characterMale != null && characterFemale == null && isname == true) {
-            Debug.Log("남자 캐릭터");
-            Debug.Log($"nickname: {nicknameInputField.transform.GetChild(2).GetComponent<Text>().text}");
+            //Debug.Log("남자 캐릭터");
+            //Debug.Log($"name: {nicknameInputField.transform.GetChild(2).GetComponent<Text>().text}");
+            playerInfoList.Add(nicknameInputField.transform.GetChild(2).GetComponent<Text>().text);
+            playerInfoList.Add("남자 캐릭터");
 
-            nameList.Add(nicknameInputField.transform.GetChild(2).GetComponent<Text>().text);
-            nameList.Add("남자 캐릭터");
-            sendData.Add(11, nameList);
-            network.CharacterCreate(sendData);
-        }
-        else if (characterMale == null && characterFemale != null && isname == true) {
-            Debug.Log("여자 캐릭터");
-            Debug.Log($"nickname: {nicknameInputField.transform.GetChild(2).GetComponent<Text>().text}");
+            network.CharacterCreate(playerInfoList);
+        } else if (characterMale == null && characterFemale != null && isname == true) {
+            //Debug.Log("여자 캐릭터");
+            //Debug.Log($"nickname: {nicknameInputField.transform.GetChild(2).GetComponent<Text>().text}");
+            playerInfoList.Add(nicknameInputField.transform.GetChild(2).GetComponent<Text>().text);
+            playerInfoList.Add("여자 캐릭터");
 
-            nameList.Add(nicknameInputField.transform.GetChild(2).GetComponent<Text>().text);
-            nameList.Add("여자 캐릭터");
-            sendData.Add(11, nameList);
-            network.CharacterCreate(sendData);
-        }
-        else
-        {
+            network.CharacterCreate(playerInfoList);
+        } else { 
             //알림창 출력
             Debug.Log("다시 확인 요청");
         }
     }
 
-    void NicknameInput(InputField input)
-    {
-        List<string> nameList = new List<string>();
-        Dictionary<int, List<string>> sendData = new Dictionary<int, List<string>>();
-        nameList.Add(network.Id.Trim());
-        Debug.Log("network.Id: " + network.Id);
-
-        if (input.text.Length > 0)
-        {
-            Debug.Log("input.text.Length > 0 경우");    
-            nameList.Add(input.text);
-            sendData.Add(10, nameList);
-            network.NickNameVerification(sendData);
-        }
-        else if (input.text.Length == 0)
-        {
-            Debug.Log("input.text.Length == 0 경우");
+    // 닉네임 검증하는 기능
+    void NicknameInput(InputField input) {
+        int Length = input.text.Length;
+        switch (Length) {
+            case 0:
+                Debug.Log("input.text.Length == 0 경우");
+                break;
+            default:
+                //Debug.Log($"input.text.Length > 0 경우: {input.text}");
+                network.NickNameVerification(input.text.Trim());
+                break;
         }
     }
 }

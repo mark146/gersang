@@ -28,13 +28,10 @@ public class Managers : MonoBehaviour
         _input.OnUpdate();
     }
 
-    static void Init()
-    {
-        if (s_instance == null)
-        {
+    static void Init() {
+        if (s_instance == null) {
             GameObject manager = GameObject.Find("@Managers");
-            if (manager == null)
-            {
+            if (manager == null) {
                 manager = new GameObject { name = "@Managers" }; // 게임 오브젝트 생성
                 manager.AddComponent<Managers>();// Managers 스크립트 추가
             }
